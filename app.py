@@ -123,13 +123,12 @@ def withdraw():
         }).execute()
 
         # 유저 삭제
-        supabase.auth.admin.delete_user(user_id)
+        supabase.rpc('delete_user', {'user_id': user_id}).execute()
         
         session.clear()
         return jsonify({"status": "success"})
     except Exception as e:
         print(f"탈퇴 에러: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # =========================
