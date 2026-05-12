@@ -602,8 +602,6 @@ function getMonthlyAnimal(expenses, monthStr){
         }
     });
 
-    cats['식비'] /= 2;
-
     const total = Object.values(cats).reduce((a,b)=>a+b,0);
     const isWin = value => value > (total-value);
 
