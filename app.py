@@ -110,21 +110,19 @@ def withdraw():
     user_id = session.get('user_id')
 
     try:
-        # A. 탈퇴 기록 테이블에 이메일과 현재 시간 저장
         supabase.table('withdrawn_users').insert({
             "email": email,
             "withdrawn_at": datetime.now().isoformat()
         }).execute()
 
-        # B. Supabase Auth에서 유저 삭제 (관리자 권한 필요)
-        # 서비스 롤 키를 사용하므로 admin 기능을 쓸 수 있음
+        # admin 대신 일반 삭제 시도
         supabase.auth.admin.delete_user(user_id)
         
         session.clear()
         return jsonify({"status": "success"})
     except Exception as e:
         print(f"탈퇴 에러: {e}")
-        return jsonify({"status": "error", "message": "탈퇴 처리 중 오류가 발생했습니다."}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # =========================
 # 지출 (Expenses)
@@ -229,14 +227,24 @@ def delete_savings():
 
     data = request.json
 
-    try:
-        supabase.table('savings') \
-            .delete() \
-            .eq("id", data['id']) \
-            .eq("user_id", session['user_id']) \
-            .execute()
+try:
+    # 유저 데이터 먼저 삭제
+    supabase.table('expenses').delete().eq("user_id", user_id).execute()
+    supabase.table('fixed_expenses').delete().eq("user_id", user_id).execute()
+    supabase.table('monthly_budgets').delete().eq("user_id", user_id).execute()
+    supabase.table('savings').delete().eq("user_id", user_id).execute()
 
-        return jsonify({"status": "success"})
+    # 탈퇴 기록 저장
+    supabase.table('withdrawn_users').insert({
+        "email": email,
+        "withdrawn_at": datetime.now().isoformat()
+    }).execute()
+
+    # 유저 삭제
+    supabase.auth.admin.delete_user(user_id)
+    
+    session.clear()
+    return jsonify({"status": "success"})
 
     except Exception as e:
         print("저축 삭제 오류:", e)
