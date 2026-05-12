@@ -276,7 +276,7 @@ function renderBudgetList() {
                     <span>
                         <b>${Number(amt).toLocaleString()}원</b>
                         <button onclick="editBudget('${m}', ${amt})" class="btn-edit-small">✎</button>
-                        <button onclick="delBudget('${m}')" style="color:red; border:none; background:none; cursor:pointer; margin-left:5px;">X</button>
+                        <button onclick="delBudget('${m}')" class="btn-delete-small">X</button>
                     </span>
                 </div>`;
         });
