@@ -271,7 +271,7 @@ function renderBudgetList() {
         sortedMonths.forEach(m => {
             const amt = monthlyBudgets[m];
             html += `
-                <div class="list-item" style="display:flex; align-items:center; justify-content:space-between;">
+                <div class="list-item">
                     <span>${m}</span>
                     <span>
                         <b>${Number(amt).toLocaleString()}원</b>
