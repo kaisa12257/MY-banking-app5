@@ -271,13 +271,13 @@ function renderBudgetList() {
         sortedMonths.forEach(m => {
             const amt = monthlyBudgets[m];
             html += `
-                <div class="list-item">
+                <div class="list-item" style="display:flex; align-items:center; justify-content:space-between;">
                     <span>${m}</span>
-         <span style="display:flex; align-items:center; gap:6px;">
-    <b>${Number(amt).toLocaleString()}원</b>
-    <button onclick="editBudget('${m}', ${amt})" class="btn-edit-small">✎</button>
-    <button onclick="delBudget('${m}')" class="btn-delete-small">X</button>
-</span>
+                    <span>
+                        <b>${Number(amt).toLocaleString()}원</b>
+                        <button onclick="editBudget('${m}', ${amt})" class="btn-edit-small">✎</button>
+                        <button onclick="delBudget('${m}')" class="btn-delete-small">X</button>
+                    </span>
                 </div>`;
         });
     }
