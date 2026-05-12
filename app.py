@@ -109,20 +109,31 @@ def withdraw():
     email = session.get('user_email')
     user_id = session.get('user_id')
 
-    try:
-        supabase.table('withdrawn_users').insert({
-            "email": email,
-            "withdrawn_at": datetime.now().isoformat()
-        }).execute()
+  try:
+    # 유저 데이터 먼저 삭제
+    supabase.table('expenses').delete().eq("user_id", user_id).execute()
+    supabase.table('fixed_expenses').delete().eq("user_id", user_id).execute()
+    supabase.table('monthly_budgets').delete().eq("user_id", user_id).execute()
+    supabase.table('savings').delete().eq("user_id", user_id).execute()
 
-        # admin 대신 일반 삭제 시도
-        supabase.auth.admin.delete_user(user_id)
-        
-        session.clear()
-        return jsonify({"status": "success"})
-    except Exception as e:
-        print(f"탈퇴 에러: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+    # 탈퇴 기록 저장
+    supabase.table('withdrawn_users').insert({
+        "email": email,
+        "withdrawn_at": datetime.now().isoformat()
+    }).execute()
+
+    # 유저 삭제
+    supabase.auth.admin.delete_user(user_id)
+    
+    session.clear()
+    return jsonify({"status": "success"})
+except Exception as e:
+    print(f"탈퇴 에러: {e}")
+    return jsonify({"status": "error", "message": str(e)}), 500
+
+# =========================
+# 지출 (Expenses)
+# =========================
 
 # =========================
 # 지출 (Expenses)
@@ -227,24 +238,14 @@ def delete_savings():
 
     data = request.json
 
-try:
-    # 유저 데이터 먼저 삭제
-    supabase.table('expenses').delete().eq("user_id", user_id).execute()
-    supabase.table('fixed_expenses').delete().eq("user_id", user_id).execute()
-    supabase.table('monthly_budgets').delete().eq("user_id", user_id).execute()
-    supabase.table('savings').delete().eq("user_id", user_id).execute()
+    try:
+        supabase.table('savings') \
+            .delete() \
+            .eq("id", data['id']) \
+            .eq("user_id", session['user_id']) \
+            .execute()
 
-    # 탈퇴 기록 저장
-    supabase.table('withdrawn_users').insert({
-        "email": email,
-        "withdrawn_at": datetime.now().isoformat()
-    }).execute()
-
-    # 유저 삭제
-    supabase.auth.admin.delete_user(user_id)
-    
-    session.clear()
-    return jsonify({"status": "success"})
+        return jsonify({"status": "success"})
 
     except Exception as e:
         print("저축 삭제 오류:", e)
